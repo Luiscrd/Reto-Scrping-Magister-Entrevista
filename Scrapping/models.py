@@ -2,7 +2,7 @@ from django.db import models
 from django.templatetags.static import static
 
 class Centros(models.Model):
-    foto = models.ImageField(upload_to='%s/images'%(static))
+    foto = models.ImageField(upload_to='%s/img'%(static))
     nombre = models.CharField(max_length=30)
     direccion = models.CharField(max_length=100)
     calle = models.CharField(max_length=30)
