@@ -5,3 +5,5 @@ mysql-python
 PyMySQL
 mysqlclient
 Pillow
+requests
+bs4
