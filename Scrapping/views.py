@@ -1,3 +1,10 @@
 from django.shortcuts import render
+from .models import Centros
 
-# Create your views here.
+def index(request):
+
+    lista_escuelas = Centros.objects.all()
+    
+    return render(request, 'index.html', {
+        "escuelas":lista_escuelas,
+    })
