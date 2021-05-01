@@ -1,0 +1,6 @@
+--upgrade pip
+pygresql
+Django==3.2
+mysql-python
+PyMySQL
+mysqlclient
