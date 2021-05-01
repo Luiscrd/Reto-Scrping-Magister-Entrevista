@@ -1,0 +1,140 @@
+body{
+    padding: 0;
+    margin: 0;
+    background-color: white;
+}
+
+#cabecera{
+    position: relative;
+    width: 100%;
+    background-color: white;
+    overflow: hidden;
+    border-bottom: solid #777 1px;
+}
+
+#logo{
+    position: relative;
+    width: 15%;
+    padding: 1.5%;
+    margin-left: 2%;
+    float: left;
+}
+
+#texto_cabecera{
+    position: relative;
+    float: right;
+    font-size: 3em;
+    font-weight: bold;
+    font-family: arial;
+    color: #2A3A60;
+    margin-right: 5%;
+    margin-top: 25px;
+}
+
+#no_escuelas{
+    position: relative;
+    width: 90%;
+    margin-left: 5%;
+    margin-top: 60px;
+    overflow: hidden;
+    margin-bottom: 50px;
+    text-align: center;
+    font-size: 3em;
+    font-family: arial;
+}
+
+#boton_cargar{
+    position: relative;
+    width: 18%;
+    margin-left: 41%;
+    padding: 10px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    background-color: #2A3A60;
+    color: white;
+    font-size: 1.2em;
+    font-family: arial;
+    font-weight: bold;
+}
+
+#boton_cargar:hover{
+    background-color: #777;
+    color: white;
+    transition: 0.5s;
+}
+
+#caja_escuelas{
+    position: relative;
+    width: 90%;
+    margin-left: 5%;
+    margin-top: 60px;
+    overflow: hidden;
+    margin-bottom: 50px;
+}
+
+.caja_escuela{
+    position: relative;
+    width: 39.8%;
+    margin: 2%;
+    overflow: hidden;
+    float: left;
+    padding: 3%;
+    border: solid #111 1px;
+    cursor: pointer;
+}
+
+.caja_escuela:hover{
+    background-color: rgba(0,0,0,0.5);
+    transition: 0.5s;
+}
+
+.foto_escuela{
+    position: relative;
+    width: 23.5%;
+    height: 100px;
+    float: left;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    border: solid #111 1px;
+}
+
+.nombre_escuela{
+    position: relative;
+    width: 74%;
+    margin-left: 2%;
+    font-family: arial;
+    font-size: 1.2em;
+    font-weight: bold;
+    float: left;
+}
+
+.direccion_escuela{
+    position: relative;
+    width: 74%;
+    margin-left: 2%;
+    margin-top: 10px;
+    font-family: arial;
+    font-size: 0.8em;
+    float: left;
+}
+
+.tipo_escuela{
+    position: relative;
+    width: 74;
+    margin-left: 2%;
+    margin-top: 10px;
+    font-family: arial;
+    font-size: 1em;
+    float: left;
+}
+
+.caja_dentro_escuela{
+    position: relative;
+    width: 79.8%;
+    margin-left: 10%;
+    overflow: hidden;
+    padding: 3%;
+    border: solid #111 1px;
+    cursor: pointer;
+}
