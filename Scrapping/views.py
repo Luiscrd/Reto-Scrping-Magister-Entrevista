@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
+from django.core.files import File
+from django.core.files.temp import NamedTemporaryFile
 from itertools import count
-import requests
 from bs4 import BeautifulSoup
+import requests
+from django.core.files.uploadedfile import SimpleUploadedFile
 import re
 from .models import Centros
 
@@ -45,8 +48,6 @@ def cargar_escuelas(request):
                 else:
                     # AÑADIMOS EL RESTO DE LA URL PARA QUE PUEDAN SER EXTRAIDAS LAS IMAGENES
                     url_imagen_escuela = "https://www.scholarum.es%s"%(url_imagen_escuela)
-                    # EXTRAEMOS LA IMAGEN DE LA URL ANTES CREADA
-                    imagen_escuela = requests.get(url_imagen_escuela)
                 # EXTRAEMOS EL NOMBRE DE LA ESCUELA
                 nombre_escuela = escuela.find("h2").text.encode("ascii", "ignore").decode("utf-8")
                 # EXTRAEMOS EL TIPO DE CENTRO
@@ -95,29 +96,78 @@ def cargar_escuelas(request):
                 # EXTRAEMOS UNA LISTA DE TODOS LOS NUMEROS DE LA DIRECCIÓN
                 lista_numeros = re.split('\D+', direccion_escula_1)
                 # HACEMOS EL ARREGLO ANTERIOMENTE MENCIONADO Y EXTRAER EL NUMERO
-                # COMPRUEBO SI ES UNA CARRETERA EN LUGAR DE UNA CALLE
-                # DE SER ASÍ LA FORMATEO ADECUADAMENTE EL NUMERO EN KM
-                if 'M-' in direccion_escula_1 or 'A-' in direccion_escula_1:
-                    numero_escuela = 'km-%s'%(lista_numeros[2])
-                elif 'km' in direccion_escula_1 or 'Km' in direccion_escula_1:
-                    numero_escuela = 'km-%s'%(lista_numeros[1])
                 # COMPROBAMOS SI NO TIENE NUMERO Y LE DAMOS ESE FORMATO AL NUMERO
                 if 's/n' in direccion_escula_1:
-                    numero_escuela = 's/n'
+                    numero_escuela = ''
                 # COMO LA LISTA DE NUMEROS PUEDE VARIAR DE LONGITUD LO CALCULAMOS
                 # SACANDO EL NUMERO CORRESPONDIENTE
                 
                 elif len(lista_numeros)>=3 and not 'km' in lista_numeros and not 's/n' in lista_numeros:
+                    
                 # COMPROBAMOS SI TIENE VARIOS NUMREROS Y LO FORMATEAMOS
-                    if '%s-'%(lista_numeros[1]) in direccion_escula_1:
+                    if '%s-'%(lista_numeros[1]) in direccion_escula_1 or '%s - '%(lista_numeros[1]) in direccion_escula_1 and not '-yr' in direccion_escula_1:
+                        
                         numero_escuela = '%s-%s'%(lista_numeros[1],lista_numeros[2])
+                    elif lista_numeros[1] in calle_escuela:
+                        numero_escuela =lista_numeros[2]
                     else:
                         numero_escuela =lista_numeros[1]
                 else:
                     numero_escuela = ''
+                # COMPRUEBO SI ES UNA CARRETERA EN LUGAR DE UNA CALLE
+                # DE SER ASÍ LA FORMATEO ADECUADAMENTE EL NUMERO EN KM
+                if 'M-' in direccion_escula_1 or 'A-' in direccion_escula_1:
+                    
+                    prueba = lista_numeros[2]+','+lista_numeros[3]
+                    if prueba in direccion_escula_1 and len(lista_numeros[3]) == 1:
+                        numero_escuela = 'km-%s,%s'%(lista_numeros[2],lista_numeros[3])
+                    else:
+                        numero_escuela = 'km-%s'%(lista_numeros[2])
+                elif 'km' in direccion_escula_1 or 'Km' in direccion_escula_1:
+                    prueba = lista_numeros[1]+','+lista_numeros[2]
+                    if prueba in direccion_escula_1 and len(lista_numeros[2]) == 1:
+                        numero_escuela = 'km-%s,%s'%(lista_numeros[1],lista_numeros[2])
+                    else:
+                        numero_escuela = 'km-%s'%(lista_numeros[1])
+                # SI ALGUNA CALLE TIENE EL NUMERO DENTRO DE LA PRIMERA COMA LO SACAMOS
+                # Y CORTAMOS EL ESTRING HASTA ESE PUNTO
+                if numero_escuela != '' and numero_escuela in calle_escuela:
+                    distancia_numero = calle_escuela.find(numero_escuela)
+                    calle_escuela = calle_escuela[0:distancia_numero-2]
+                    calle_escuela = re.sub(r"\s+$", "", calle_escuela)
+                # EXTRAEMOS EL CODIGO POSTAL QUE SE ENCUENTRA EN 
+                # LA ULTIMA POSICIÓN DE LA LISTA DE NUMEROS
+                codigo_postal_escuela = lista_numeros[len(lista_numeros)-1]
+                # AHORA SACAMOS LA POBLACIÓN Y LA CIUDAD
+                coma_poblacion = direccion_escula_2.find(",")
+                poblacion_escuela = direccion_escula_2[:coma_poblacion].title()
+                ciudad_escuela = direccion_escula_2[coma_poblacion+2:].replace('(', '').replace(')', '').title()
+                
+                # CREAMOS EL CENTRO, AÑADIMOS PARAMETROS Y GUARDAMOS
+                '''DESCOMENTAR LINEAS PARA GUARDAR LATITUD Y LONGITUD
+                   ESTO CAUSA UN INCREMENTO COSNSIDERABE EN EL TIEMPO DE CARGA
+                   EN SU DEFECTO LO HE COLOCADO AL ABRIR LA ESCUELA
 
-                print(direccion_escula_1)
-                print('%s, %s'%(calle_escuela,numero_escuela))
+                #geolocator = Nominatim(user_agent="Magister")
+                #geo = geolocator.geocode('%s, españa'%(codigo_pos))'''
+
+                if  nombre_escuela:
+                    centro = Centros.objects.create()
+                    centro.nombre = nombre_escuela
+                    centro.foto = url_imagen_escuela
+                    centro.direccion = direccion_escula_1+', '+direccion_escula_2+'.'
+                    centro.calle = calle_escuela
+                    centro.numero = numero_escuela
+                    centro.pobalcion = poblacion_escuela
+                    centro.ciudad = ciudad_escuela
+                    centro.tipo = tipo_de_centro
+                    centro.codigo = codigo_postal_escuela
+                    #centro.latitud = geo.latitude
+                    #centro.longitud = geo.longitude
+                    centro.save()
+                    print(centro.nombre+" - OK")
+
+                
         else:
             # CUANDO LA LISTA LLEGA VACIA PARAMOS EL BUCLE INFINITO
             activar_bucle = False

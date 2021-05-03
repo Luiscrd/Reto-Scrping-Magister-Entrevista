@@ -66,7 +66,7 @@ WSGI_APPLICATION = 'Reto1.wsgi.application'
 DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.mysql',
-            'NAME': 'prueba',
+            'NAME': 'Magister',
             'USER': 'luis2',
             'PASSWORD': '1234',
             'HOST': '127.0.0.1',
