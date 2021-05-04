@@ -1,0 +1,40 @@
+{% extends 'index.html' %}
+{% block content %}
+{% load static %}
+{% if escuelas %}
+<div id="caja_escuelas">
+    {% for escuela in escuelas %}
+    <div class="caja_escuela"  onclick="rellenar({{ escuela.pk }})">
+        {% if escuela.foto %}
+        <div class="foto_escuela" style="background-image: url('{{ escuela.foto }}');"></div>
+        {% else %}
+        <div class="foto_escuela" style="background-image: url({% static 'img/no_foto.png' %});"></div>
+        {% endif %}
+        <div class="nombre_escuela">{{ escuela.nombre }}</div>
+        <div class="direccion_escuela">{{ escuela.direccion }}</div>
+        <div class="tipo_escuela">{{ escuela.tipo }}</div>
+        <div class="tipo_escuela">{{ escuela.distancia }}</div>
+    </div>
+    {% endfor %}
+</div>
+    {% else %}
+<div id="no_escuelas">No hay escuelas cargadas en la base de datos</div>
+<form method="get" action="/cargar">
+<button type="submit" id="boton_cargar">Cargar Escuelas</button>
+</form>
+<div id="cargando">
+    <img id="logo_cargando" src="{% static 'img/cargando.gif' %}">
+    <div id="texto_cargando">Cargando Escuelas en la base de datos en un momento se mostrara el resultado</div>
+</div>
+{% endif %}
+<div id="cargando">
+    <img id="logo_cargando" src="{% static 'img/cargando.gif' %}">
+    <div id="texto_cargando">Cargando Escuela en un momento se mostrara el resultado</div>
+</div>
+<form method="POST" id="for_datos">{% csrf_token %}
+    <input type="hidden" id="pk" name="pk"> 
+    <input type="hidden" id="lati" name="lati"> 
+    <input type="hidden" id="longi" name="longi"> 
+</form>
+{% endblock %}
+

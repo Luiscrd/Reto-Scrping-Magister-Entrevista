@@ -7,3 +7,5 @@ mysqlclient
 Pillow
 requests
 bs4
+geopy
+vincenty

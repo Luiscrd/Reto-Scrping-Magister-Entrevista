@@ -4,6 +4,8 @@ from django.core.files import File
 from django.core.files.temp import NamedTemporaryFile
 from itertools import count
 from bs4 import BeautifulSoup
+from geopy.geocoders import Nominatim
+from vincenty import vincenty
 import requests
 from django.core.files.uploadedfile import SimpleUploadedFile
 import re
@@ -11,11 +13,49 @@ from .models import Centros
 
 def index(request):
 
+    # CARGAMOS UN LISTADO CON TODS LAS ESCUELAS DE LA BASE DE DATOS
     lista_escuelas = Centros.objects.all()
+    # COMPROBAMOS SI RECIBE UNA RESPUESTA POST
+    if request.method == 'POST':
+        # SACAMOS EL iD DE ESCUELA RECIBIDO EN POST
+        id_escuela = request.POST.get('pk')
+        # OBTENEMOS LATITUD Y LONGITUD DEL USUARIO
+        latitud_usuario = request.POST.get('lati')
+        longitud_usuario = request.POST.get('longi')
+        # OBTENEMODS LA ESCUELA CON EL ID
+        escuela = Centros.objects.get(pk=id_escuela)
+        # CREAMOS UN GEOLOCALIZADOR
+        geolocator = Nominatim(user_agent="Magister")
+        # LE PASAMOS EL CODIGO POSTAL DE LA ESCUELA PARA CONEGUIR UNA DISTNCIA APROXIMADA
+        geo1 = geolocator.geocode('%s, españa'%(escuela.codigo))
+        # AQUI AÑADIMOS CORDENADAS A LA BASE DE DATOS PARA FUTURAS CONSULTAS
+        # AL HACER CLICK EN CADA ESCCUELA
+        # PUEDE HACERSE AL CARGAR DATOS PERO RELENTIZA EL PROCESO
+        # DE ESTA MANERA QUITAMOS TIEMPO DE ESPERA EN LA CARGA
+        # Y VAMOS AÑADIENDO CORDENADAS SEGUN VEMOS CADA ESCUELA
+        # PUEDE HACERSE EN CUALQUIERA DE LOS 2 PUNTOS A GUSTO
+        escuela.latitud = geo1.latitude
+        escuela.longitud = geo1.longitude
+        escuela.save()
+        # CREAMOS OBJETOS PARA CALCULAR DISTANCIA DESDE EL USUARIO A LA ESCUELA
+        cor_geo1 = (geo1.latitude, geo1.longitude)
+        cor_geo2 = (float(latitud_usuario), float(longitud_usuario))
+        # CALCULAMOS DISTANCIA Y FORMATEAMOS CORRECTAMENTE
+        distancia = vincenty(cor_geo1,cor_geo2)
+        distancia = '%s Km'%(int(distancia))
+        # CREAMOS UNA URL PARA MOSTRAR UN MAPA CON LA UBICACIÓN
+        url_mapa = escuela.nombre+', '+escuela.calle+', '+escuela.numero+', '+escuela.pobalcion+', '+escuela.ciudad+', '+escuela.codigo
+
+        return render(request, 'escuela.html', {
+            "escuela":escuela,
+            "distancia":distancia,
+            'url':url_mapa,
+        })
     
-    return render(request, 'index.html', {
+    return render(request, 'escuelas.html', {
         "escuelas":lista_escuelas,
     })
+
 
 def cargar_escuelas(request):
 

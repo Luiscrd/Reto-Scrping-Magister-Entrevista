@@ -1,0 +1,14 @@
+{% extends 'index.html' %}
+{% load static %}
+{% block content %}
+<div class="caja_dentro_escuela2">
+    <div class="foto_escuela2" style="background-image: url('{{ escuela.foto }}');"></div>
+    <div class="nombre_escuela2">{{ escuela.nombre }}</div>
+    <div class="direccion_escuela2">{{ escuela.direccion }}</div>
+    <div class="tipo_escuela2">Tipo de cento: {{ escuela.tipo }}.</div>
+    <div class="tipo_escuela2">Distancia : {{ distancia }}.</div>
+    <div id="texto_epli">Para saber como llegar pulsa "view larger map"  dentro del mapa para ir a googlemaps</div>
+    <div id="caja_mapa"><iframe id="mapa" src="https://maps.google.com/maps?width=700&amp;height=440&amp;hl=en&amp;q={{ url }}+(T%C3%ADtulo)&amp;ie=UTF8&amp;t=&amp;z=16&amp;iwloc=B&amp;output=embed" frameborder="0" scrolling="no" marginheight="0" marginwidth="0"></iframe><div style="position: absolute;width: 80%;bottom: 10px;left: 0;right: 0;margin-left: auto;margin-right: auto;color: #000;text-align: center;"><small style="line-height: 1.8;font-size: 2px;background: #fff;">Powered by <a href="http://www.googlemapsgenerator.com/zh/">gmapgen zh</a> & <a href="https://embedfbvideo.com">embed facebook video on website</a></small></div><style>#gmap_canvas img{max-width:none!important;background:none!important}</style></div><br />-->
+</div>
+{% endblock %}
+
