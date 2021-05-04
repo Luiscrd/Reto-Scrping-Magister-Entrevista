@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.shortcuts import redirect
 from django.core.files import File
+from django.templatetags.static import static
 from django.core.files.temp import NamedTemporaryFile
 from itertools import count
 from bs4 import BeautifulSoup
@@ -9,6 +10,7 @@ from vincenty import vincenty
 import requests
 from django.core.files.uploadedfile import SimpleUploadedFile
 import re
+import urllib
 from .models import Centros
 
 def index(request):
@@ -45,7 +47,7 @@ def index(request):
         distancia = '%s Km'%(int(distancia))
         # CREAMOS UNA URL PARA MOSTRAR UN MAPA CON LA UBICACIÓN
         url_mapa = escuela.nombre+', '+escuela.calle+', '+escuela.numero+', '+escuela.pobalcion+', '+escuela.ciudad+', '+escuela.codigo
-
+        
         return render(request, 'escuela.html', {
             "escuela":escuela,
             "distancia":distancia,
@@ -66,8 +68,9 @@ def cargar_escuelas(request):
     activar_bucle = True
     # CREAMOS UN BUCLE INFINITO PARA RECORRER LAS PAGINAS
     while  activar_bucle == True:
+        a = next(contador)
         # HACEMOS UNA PETICION GET A LA PAGINA AÑADIENDO EL NUMERO MEDIANTE EL CONTADOR
-        pagina = requests.get('https://www.scholarum.es/es/listado-centros-estiron/%s'%(next(contador)))
+        pagina = requests.get('https://www.scholarum.es/es/listado-centros-estiron/%s'%(a))
         soup = BeautifulSoup(pagina.content, "html.parser")
         # hACEMOS SCRAPPING PARA SACAR EL CUADRO DE ESCUELAS Y LUEGO UNA LISTA CON LAS ESCUELAS
         cuadro_escuelas = soup.find("div", {"id":"ctl00_ContentPlaceHolder1_colegios_destacados"})
@@ -81,13 +84,20 @@ def cargar_escuelas(request):
             for escuela in escuelas:
                 #COMENZAMOS A EXTRAER DATOS
                 # EXTRAEMOS LA IMAGEN Y SACAMOS SU SRC
-                url_imagen_escuela = escuela.find("img").get("src").encode("ascii", "ignore").decode("utf-8")
+                url_imagen_escuela = escuela.find("img").get("src")
                 # EVITAMOS LA IMAGEN POR DEFETO DE LOS CENTROS SIN IMAGEN
-                if url_imagen_escuela == 'img_logo.jpg':
-                    imagen_escuela = ''
+                
+                if url_imagen_escuela == '/imagenes/img_logo.jpg':
+                    nombre_foto = ''
                 else:
                     # AÑADIMOS EL RESTO DE LA URL PARA QUE PUEDAN SER EXTRAIDAS LAS IMAGENES
+                    # DESCARGAMOS IMAGEN Y CREAMOS EL NOMBRE PARQA LUEGO MOSTRARLAS
+                    barra_foto = url_imagen_escuela.rfind('/')
+                    nombre_foto = url_imagen_escuela[barra_foto:].encode("ascii", "ignore").decode("utf-8")
                     url_imagen_escuela = "https://www.scholarum.es%s"%(url_imagen_escuela)
+                    myfile = requests.get(url_imagen_escuela)
+                    open('static/fotos/%s'%(nombre_foto),'wb').write(myfile.content)
+                    myfile.close()
                 # EXTRAEMOS EL NOMBRE DE LA ESCUELA
                 nombre_escuela = escuela.find("h2").text.encode("ascii", "ignore").decode("utf-8")
                 # EXTRAEMOS EL TIPO DE CENTRO
@@ -194,7 +204,7 @@ def cargar_escuelas(request):
                 if  nombre_escuela:
                     centro = Centros.objects.create()
                     centro.nombre = nombre_escuela
-                    centro.foto = url_imagen_escuela
+                    centro.foto = nombre_foto
                     centro.direccion = direccion_escula_1+', '+direccion_escula_2+'.'
                     centro.calle = calle_escuela
                     centro.numero = numero_escuela

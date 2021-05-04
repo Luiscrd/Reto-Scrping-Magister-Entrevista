@@ -2,7 +2,11 @@
 {% load static %}
 {% block content %}
 <div class="caja_dentro_escuela2">
-    <div class="foto_escuela2" style="background-image: url('{{ escuela.foto }}');"></div>
+    {% if escuela.foto %}
+    <div class="foto_escuela2" style="background-image: url('{% static 'fotos' %}{{ escuela.foto }}');"></div>
+    {% else %}
+    <div class="foto_escuela2" style="background-image: url({% static 'img/no_foto.png' %});"></div>
+    {% endif %}
     <div class="nombre_escuela2">{{ escuela.nombre }}</div>
     <div class="direccion_escuela2">{{ escuela.direccion }}</div>
     <div class="tipo_escuela2">Tipo de cento: {{ escuela.tipo }}.</div>

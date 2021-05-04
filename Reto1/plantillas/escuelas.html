@@ -6,7 +6,7 @@
     {% for escuela in escuelas %}
     <div class="caja_escuela"  onclick="rellenar({{ escuela.pk }})">
         {% if escuela.foto %}
-        <div class="foto_escuela" style="background-image: url('{{ escuela.foto }}');"></div>
+        <div class="foto_escuela" style="background-image: url('{% static 'fotos' %}{{ escuela.foto }}');"></div>
         {% else %}
         <div class="foto_escuela" style="background-image: url({% static 'img/no_foto.png' %});"></div>
         {% endif %}
@@ -20,7 +20,7 @@
     {% else %}
 <div id="no_escuelas">No hay escuelas cargadas en la base de datos</div>
 <form method="get" action="/cargar">
-<button type="submit" id="boton_cargar">Cargar Escuelas</button>
+<button type="submit" id="boton_cargar" onclick="carg()">Cargar Escuelas</button>
 </form>
 <div id="cargando">
     <img id="logo_cargando" src="{% static 'img/cargando.gif' %}">
